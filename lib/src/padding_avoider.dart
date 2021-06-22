@@ -24,7 +24,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
   @override
   void initState() {
     super.initState();
-    // allows for watching for changes in the widgets
+    // allows for watching for changes in the widgets like did change metrics
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -46,6 +46,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
 
   @override
   void didChangeMetrics() {
+    print('changing metrics');
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       if (widget._fn.hasFocus) {
         checkResize();
@@ -73,7 +74,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
     final mediaQuery = MediaQuery.of(context);
     final screenSize = mediaQuery.size;
     final screenInsets = mediaQuery.viewInsets;
-
+    print('checking');
     // screenInsets.bottom is the distance from bottom of screen to top of keyboard inset
     // translate to y coord:
     final keyboardTop = screenSize.height - screenInsets.bottom;
