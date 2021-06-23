@@ -9,14 +9,20 @@ import 'package:keyboardphobic/src/padding_avoider.dart';
 /// easy to create a keyboard aware `TextField` has the same arguments as `TextField`.
 /// Automatically adds padding to move the field to the top of the keyboard if it is
 /// obscured, and creates a `FocusNode` for you if you don't provide one.
+/// [keyboardPadding] is the vertical distance that the `SmartTextField` will
+/// maintain between its bottom edge and the keyboard
 ///
 /// **WARNING** does not work inside a `Scaffold` unless the scaffold's [resizeToAvoidBottomInset] parameter
 /// is set to `false`. This is just how flutter works with keyboards.
-///
+/// It also won't work properly in columns that have a relative `mainAxisAlignment`, for example `spacedEvenly` or `spacedAround`.
+/// Please use `MainAxisAlignment.end` as this will ensure that the padding added to avoid the keyboard pushes the
+/// [child] widget up instead of pushing into empty space and not pushing the [child] up.
 ///
 class SmartTextField extends StatefulWidget {
   SmartTextField({
     Key? key,
+    double keyboardPadding = 0,
+    Duration? duration,
     TextEditingController? controller,
     FocusNode? focusNode,
     InputDecoration decoration = const InputDecoration(),
@@ -67,8 +73,9 @@ class SmartTextField extends StatefulWidget {
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
     String? restorationId,
-  }) : super(key: key) {
-    fn = focusNode ?? FocusNode();
+  })  : this.duration = duration,
+        this.fn = focusNode ?? FocusNode(),
+        this.keyboardPadding = keyboardPadding {
     tf = TextField(
       key: key,
       controller: controller,
@@ -125,7 +132,9 @@ class SmartTextField extends StatefulWidget {
   }
 
   late final TextField tf;
-  late final FocusNode fn;
+  final FocusNode fn;
+  final double keyboardPadding;
+  final Duration? duration;
 
   @override
   _SmartTextFieldState createState() => _SmartTextFieldState();
@@ -134,6 +143,11 @@ class SmartTextField extends StatefulWidget {
 class _SmartTextFieldState extends State<SmartTextField> {
   @override
   Widget build(BuildContext context) {
-    return PaddingAvoider(child: widget.tf, fn: widget.fn);
+    return PaddingAvoider(
+      child: widget.tf,
+      focusNode: widget.fn,
+      keyboardPadding: widget.keyboardPadding,
+      duration: widget.duration,
+    );
   }
 }

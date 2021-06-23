@@ -2,16 +2,28 @@ library keyboardphobic;
 
 import 'package:flutter/material.dart';
 
-import 'keyboard_utility.dart';
+import '../keyboard_avoider.dart';
 
+/// A widget that will ensure that its child remains above the keyboard when focused.
+/// [keyboardPadding] is the padding maintained between the bottom of the [child] widget and the top of the keyboard.
+/// [focusNode] is a `FocusNode` that is used to determine when the padding avoider needs to add padding.
 class PaddingAvoider extends StatefulWidget {
-  const PaddingAvoider({Key? key, required Widget child, required FocusNode fn})
+  const PaddingAvoider(
+      {Key? key,
+      double keyboardPadding = 0,
+      required Widget child,
+      required FocusNode focusNode,
+      Duration? duration})
       : this._child = child,
-        this._fn = fn,
+        this._fn = focusNode,
+        this.keyboardPadding = keyboardPadding,
+        this.duration = duration ?? const Duration(milliseconds: 200),
         super(key: key);
 
   final Widget _child;
   final FocusNode _fn;
+  final double keyboardPadding;
+  final Duration duration;
 
   @override
   _PaddingAvoiderState createState() => _PaddingAvoiderState();
@@ -40,13 +52,12 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
   Widget build(BuildContext context) {
     return AnimatedContainer(
         padding: EdgeInsets.fromLTRB(0, 0, 0, paddingAmount),
-        duration: Duration(milliseconds: 100),
+        duration: widget.duration,
         child: widget._child);
   }
 
   @override
   void didChangeMetrics() {
-    print('changing metrics');
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       if (widget._fn.hasFocus) {
         checkResize();
@@ -68,13 +79,14 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
 
     // top left of widget from top left of screen
     var offset = renderBox.localToGlobal(Offset.zero);
-    // add box's height to offset to get bottom of widget
-    var widgetBottom = offset.dy + renderBox.size.height;
+    // add box's height to offset to get bottom of widget. Also add keyboard padding
+    var widgetBottom =
+        offset.dy + renderBox.size.height + widget.keyboardPadding;
 
     final mediaQuery = MediaQuery.of(context);
     final screenSize = mediaQuery.size;
     final screenInsets = mediaQuery.viewInsets;
-    print('checking');
+
     // screenInsets.bottom is the distance from bottom of screen to top of keyboard inset
     // translate to y coord:
     final keyboardTop = screenSize.height - screenInsets.bottom;
@@ -83,22 +95,9 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
 
     if (keyboardTop < widgetBottom) {
       var overlap = widgetBottom - keyboardTop;
-
       setState(() {
         paddingAmount = overlap;
       });
-
-      // widget.fn.addListener(unfocusListener);
     }
   }
-
-  // void unfocusListener() {
-  //   if (!widget.fn.hasFocus) {
-  //     // animating to zero moves it back to zero offset from
-  //     setState(() {
-  //       paddingAmount = 0;
-  //     });
-  //     widget.fn.removeListener(() => unfocusListener);
-  //   }
-  // }
 }
