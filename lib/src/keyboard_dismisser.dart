@@ -8,7 +8,6 @@ class KeyboardDismisser extends StatelessWidget {
         super(key: key);
 
   final Widget _child;
-  final FocusNode _fn = FocusNode();
   final Color _debugColor;
 
   @override
@@ -18,9 +17,12 @@ class KeyboardDismisser extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         child: _child,
-        onTap: () {
-          print('dismissing');
-          FocusScope.of(context).requestFocus(_fn);
+        onTap: () => FocusScope.of(context).unfocus(),
+        onVerticalDragUpdate: (drag) {
+          var dist = drag.delta.distanceSquared;
+          if (dist > 800 && drag.delta.direction > 0) {
+            FocusScope.of(context).unfocus();
+          }
         },
       ),
     );
