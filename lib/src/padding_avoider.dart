@@ -10,19 +10,22 @@ import '../keyboard_avoider.dart';
 class PaddingAvoider extends StatefulWidget {
   const PaddingAvoider(
       {Key? key,
-      double keyboardPadding = 0,
+      double? keyboardOffset,
       required Widget child,
       required FocusNode focusNode,
-      Duration? duration})
+      Duration? duration,
+      Curve? animationCurve})
       : this._child = child,
         this._fn = focusNode,
-        this.keyboardPadding = keyboardPadding,
+        this.keyboardPadding = keyboardOffset ?? 0,
         this.duration = duration ?? const Duration(milliseconds: 200),
+        this.animationCurve = animationCurve ?? Curves.decelerate,
         super(key: key);
 
   final Widget _child;
   final FocusNode _fn;
   final double keyboardPadding;
+  final Curve animationCurve;
   final Duration duration;
 
   @override
@@ -53,6 +56,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
     return AnimatedContainer(
         padding: EdgeInsets.fromLTRB(0, 0, 0, paddingAmount),
         duration: widget.duration,
+        curve: widget.animationCurve,
         child: widget._child);
   }
 

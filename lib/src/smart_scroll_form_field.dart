@@ -3,14 +3,16 @@ import 'package:flutter/services.dart';
 
 import '../keyboard_avoider.dart';
 
-class SmartFormField extends StatefulWidget {
-  SmartFormField({
+class SmartScrollFormField extends StatelessWidget {
+  SmartScrollFormField({
     Key? key,
-    double keyboardPadding = 0,
+    double? keyboardOffset,
+    Curve? animationCurve,
     Duration? duration,
+    required ScrollController enclosingScrollController,
     TextEditingController? controller,
     String? initialValue,
-    FocusNode? focusNode,
+    required FocusNode focusNode,
     InputDecoration? decoration = const InputDecoration(),
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
@@ -57,8 +59,10 @@ class SmartFormField extends StatefulWidget {
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
   })  : this.duration = duration,
-        this.fn = focusNode ?? FocusNode(),
-        this.keyboardPadding = keyboardPadding,
+        this.animationCurve = animationCurve,
+        this.fn = focusNode,
+        this.sc = enclosingScrollController,
+        this.keyboardOffset = keyboardOffset,
         super(key: key) {
     tff = TextFormField(
       key: key,
@@ -114,22 +118,20 @@ class SmartFormField extends StatefulWidget {
   }
 
   late final TextFormField tff;
+  final ScrollController sc;
   final FocusNode fn;
-  final double keyboardPadding;
+  final Curve? animationCurve;
+  final double? keyboardOffset;
   final Duration? duration;
 
   @override
-  _SmartFormFieldState createState() => _SmartFormFieldState();
-}
-
-class _SmartFormFieldState extends State<SmartFormField> {
-  @override
   Widget build(BuildContext context) {
-    return PaddingAvoider(
-      child: widget.tff,
-      focusNode: widget.fn,
-      keyboardPadding: widget.keyboardPadding,
-      duration: widget.duration,
-    );
+    return ScrollAvoider(
+        child: tff,
+        duration: duration,
+        animationCurve: animationCurve,
+        keyboardOffset: keyboardOffset,
+        scrollController: sc,
+        focusNode: fn);
   }
 }
