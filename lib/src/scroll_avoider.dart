@@ -55,16 +55,26 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
     return widget.child;
   }
 
+  double? returnPos;
+
   @override
   void didChangeMetrics() {
-    if (widget.fn.hasFocus) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        checkScroll();
-      });
-    }
+    var active = Keyboard.of(context).isActive;
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (widget.fn.hasFocus) {
+        // keyboard not active until post frame callback so if not active then was first to move
+
+        checkScroll(active);
+      } else if (returnPos != null && Keyboard.of(context).isNotActive) {
+        widget.sc.animateTo(returnPos!,
+            duration: widget.duration, curve: widget.animationCurve);
+        returnPos = null;
+      }
+    });
   }
 
-  void checkScroll() {
+  void checkScroll(bool kbAlreadyActive) {
     // `State` can get its context unlike a Stateless widget
     var renderBox = context.findRenderObject() as RenderBox;
 
@@ -85,30 +95,25 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
 
     if (keyboardTop < widgetBottom) {
       var overlap = widgetBottom - keyboardTop;
-      // TODO fix this as it doesn't work properly if already scrolled down
       var scrollCtrlr = widget.sc;
       var currentPosition = scrollCtrlr.offset;
+      returnPos = currentPosition;
       var scrollAmount = currentPosition + overlap + widget.keyboardOffset;
 
       scrollCtrlr.animateTo(scrollAmount,
           duration: widget.duration, curve: widget.animationCurve);
-      widget.fn.addListener(() => unfocusListener(currentPosition));
     }
   }
 
-  void unfocusListener(double originalPosition) {
+  void scrollBack(double originalPosition) {
     // if still active, they don't move it as if use selects textfield above the
     // kb then it will suddenly drop down under the kb
     // only check after the keyboard has been retracted
     WidgetsBinding.instance?.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 200)).then((_) {
-        if (!widget.fn.hasFocus && !Keyboard.of(context).isActive) {
-          // animating to zero moves it back to zero offset from
-          widget.sc.animateTo(originalPosition,
-              duration: widget.duration, curve: widget.animationCurve);
-          widget.fn.removeListener(() => unfocusListener(originalPosition));
-        }
-      });
+      if (!widget.fn.hasFocus && !Keyboard.of(context).isActive) {
+        // animating to zero moves it back to zero offset from
+
+      }
     });
   }
 }

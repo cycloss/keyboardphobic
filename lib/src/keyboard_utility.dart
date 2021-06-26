@@ -6,6 +6,8 @@ class Keyboard {
 
   bool get isActive => height > 0;
 
+  bool get isNotActive => !isActive;
+
   /// The distance from the bottom of the screen to the top of the keyboard
   double get height {
     return MediaQuery.of(_context).viewInsets.bottom;

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debug app",
+            "request": "attach",
+            "type": "dart",
+            "deviceId": "51ABDF9C-C54D-4811-BBDA-E733639AEC51",
+            "program": "example/lib/main.dart",
+            "args": [
+                "--app-id",
+                "com.example.example"
+            ]
+        },
+    ]
+}

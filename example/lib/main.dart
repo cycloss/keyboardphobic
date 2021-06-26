@@ -68,7 +68,7 @@ class Example extends StatelessWidget {
                   // physics: AlwaysScrollableScrollPhysics(),
                   controller: scrollController,
                   children: [
-                    ...List.generate(15, (_) => box),
+                    ...List.generate(25, (_) => box),
                     Text(
                       'Scroll avoid',
                       style: TextStyle(fontWeight: FontWeight.w900),
@@ -93,7 +93,7 @@ class Example extends StatelessWidget {
                       validator: (text) => 'validator error text',
                       autovalidateMode: AutovalidateMode.always,
                     ),
-                    ...List.generate(15, (_) => box),
+                    ...List.generate(25, (_) => box),
                   ],
                 ),
               ),
