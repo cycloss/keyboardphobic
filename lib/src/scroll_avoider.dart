@@ -64,7 +64,6 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       if (widget.fn.hasFocus) {
         // keyboard not active until post frame callback so if not active then was first to move
-
         checkScroll(active);
       } else if (returnPos != null && Keyboard.of(context).isNotActive) {
         widget.sc.animateTo(returnPos!,
@@ -77,7 +76,6 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
   void checkScroll(bool kbAlreadyActive) {
     // `State` can get its context unlike a Stateless widget
     var renderBox = context.findRenderObject() as RenderBox;
-
     // top left of widget from top left of screen
     var offset = renderBox.localToGlobal(Offset.zero);
     // add box's height to offset to get bottom of widget
@@ -91,29 +89,19 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
     // translate to y coord:
     final keyboardTop = screenSize.height - screenInsets.bottom;
 
-    // if keyboardTop less than widgetBottom then keyboardTop higher up and overlapping
-
-    if (keyboardTop < widgetBottom) {
-      var overlap = widgetBottom - keyboardTop;
-      var scrollCtrlr = widget.sc;
-      var currentPosition = scrollCtrlr.offset;
+    var overlap = widgetBottom - keyboardTop;
+    var scrollCtrlr = widget.sc;
+    var currentPosition = scrollCtrlr.offset;
+    // if wasn't active then was first to come into focus
+    // Always set this as other text fields may push the first higher
+    if (!kbAlreadyActive) {
       returnPos = currentPosition;
-      var scrollAmount = currentPosition + overlap + widget.keyboardOffset;
-
+    }
+    var scrollAmount = currentPosition + overlap + widget.keyboardOffset;
+    // if keyboardTop less than widgetBottom (then keyboardTop higher up and overlapping)
+    if (keyboardTop < widgetBottom) {
       scrollCtrlr.animateTo(scrollAmount,
           duration: widget.duration, curve: widget.animationCurve);
     }
-  }
-
-  void scrollBack(double originalPosition) {
-    // if still active, they don't move it as if use selects textfield above the
-    // kb then it will suddenly drop down under the kb
-    // only check after the keyboard has been retracted
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      if (!widget.fn.hasFocus && !Keyboard.of(context).isActive) {
-        // animating to zero moves it back to zero offset from
-
-      }
-    });
   }
 }
