@@ -2,7 +2,7 @@
 
 A library with widgets that avoid being covered by the software keyboard.
 
-See the example directory for how to the widgets in the library.
+See the example directory for how to use the widgets in the library.
 
 ## Important Caveats
 

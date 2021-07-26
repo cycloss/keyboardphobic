@@ -5,34 +5,31 @@ import '../keyboard_avoider.dart';
 /// A widget that will ensure that its child remains above the keyboard when focused.
 /// [keyboardPadding] is the padding maintained between the bottom of the [child] widget and the top of the keyboard.
 /// [focusNode] is a `FocusNode` that is used to determine when the padding avoider needs to add padding.
-class PaddingAvoider extends StatefulWidget {
-  const PaddingAvoider(
+class KeyboardPaddingBox extends StatefulWidget {
+  const KeyboardPaddingBox(
       {Key? key,
       double? keyboardOffset,
       this.paddingFactor = 1,
-      required Widget child,
-      required FocusNode focusNode,
+      required List<FocusNode> focusNodes,
       Duration? duration,
       Curve? animationCurve})
-      : this._child = child,
-        this._fn = focusNode,
+      : this._fns = focusNodes,
         this.keyboardPadding = keyboardOffset ?? 0,
         this.duration = duration ?? const Duration(milliseconds: 200),
         this.animationCurve = animationCurve ?? Curves.decelerate,
         super(key: key);
 
-  final Widget _child;
-  final FocusNode _fn;
+  final List<FocusNode> _fns;
   final double keyboardPadding;
   final double paddingFactor;
   final Curve animationCurve;
   final Duration duration;
 
   @override
-  _PaddingAvoiderState createState() => _PaddingAvoiderState();
+  _KeyboardPaddingBoxState createState() => _KeyboardPaddingBoxState();
 }
 
-class _PaddingAvoiderState extends State<PaddingAvoider>
+class _KeyboardPaddingBoxState extends State<KeyboardPaddingBox>
     with WidgetsBindingObserver {
   // widgets binding observer has didChangeMetrics which is called when viewport resizes
 
@@ -58,29 +55,33 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
             EdgeInsets.fromLTRB(0, 0, 0, paddingAmount * widget.paddingFactor),
         duration: widget.duration,
         curve: widget.animationCurve,
-        child: widget._child);
+        child: Container());
   }
 
   @override
   void didChangeMetrics() {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
-      if (widget._fn.hasFocus) {
-        checkResize();
-      } else {
-        // if still active, they don't move it as if use selects textfield above the
-        // kb then it will suddenly drop down under the kb
-        if (!Keyboard.of(context).isActive) {
-          setState(() {
-            paddingAmount = 0;
-          });
+      for (var fn in widget._fns) {
+        if (fn.hasFocus) {
+          checkResize(fn.context?.findRenderObject() as RenderBox);
+        } else {
+          // if still active, they don't move it as if use selects textfield above the
+          // kb then it will suddenly drop down under the kb
+          if (!Keyboard.of(context).isActive) {
+            setState(() {
+              paddingAmount = 0;
+            });
+          }
         }
       }
     });
   }
 
-  void checkResize() {
-    // `State` can get its context unlike a Stateless widget
-    var renderBox = context.findRenderObject() as RenderBox;
+  void checkResize(RenderBox? renderBox) {
+    if (renderBox == null) {
+      print('render box was null');
+      return;
+    }
 
     // top left of widget from top left of screen
     var offset = renderBox.localToGlobal(Offset.zero);
@@ -101,7 +102,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
     if (keyboardTop < widgetBottom) {
       var overlap = widgetBottom - keyboardTop;
       setState(() {
-        paddingAmount = overlap;
+        paddingAmount = overlap * widget.paddingFactor;
       });
     }
   }
