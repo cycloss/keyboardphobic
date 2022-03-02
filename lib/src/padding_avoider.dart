@@ -64,6 +64,7 @@ class _PaddingAvoiderState extends State<PaddingAvoider>
   @override
   void didChangeMetrics() {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (widget._fn.hasFocus) {
         checkResize();
       } else {

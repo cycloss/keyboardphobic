@@ -62,6 +62,7 @@ class _ScrollAvoiderState extends State<ScrollAvoider>
     var active = Keyboard.of(context).isActive;
 
     WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (widget.fn.hasFocus) {
         // keyboard not active until post frame callback so if not active then was first to move
         checkScroll(active);

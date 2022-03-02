@@ -61,6 +61,7 @@ class _KeyboardPaddingBoxState extends State<KeyboardPaddingBox>
   @override
   void didChangeMetrics() {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (!mounted) return;
       for (var fn in widget._fns) {
         if (fn.hasFocus) {
           checkResize(fn.context?.findRenderObject() as RenderBox);
